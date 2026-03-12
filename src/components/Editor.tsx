@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { LoaderConfig, CellShape, AnimationStyle } from '../types';
-import { Settings, Play, Square, Circle, Box, Zap, Sun, Wind, Trash2, Copy, Download, RotateCcw, Grid3X3, Dot, Sparkles, LayoutGrid, X } from 'lucide-react';
+import { Settings, Play, Square, Circle, Box, Zap, Sun, Wind, Trash2, Copy, Download, RotateCcw, Grid3X3, Dot, Sparkles, LayoutGrid, X, FileJson, Image as ImageIcon, Code } from 'lucide-react';
 import { CodeModal } from './CodeModal';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -15,9 +15,165 @@ interface EditorProps {
 export const Editor: React.FC<EditorProps> = ({ config, onChange, onReset, isOpen, onClose }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState({ title: '', code: '' });
+  const [copiedSVG, setCopiedSVG] = useState(false);
 
   const updateConfig = (updates: Partial<LoaderConfig>) => {
     onChange({ ...config, ...updates });
+  };
+
+  const copySVG = async () => {
+    const size = config.gridSize * 40;
+    const cells = Array.from({ length: config.gridSize * config.gridSize }).map((_, i) => {
+      const isActive = config.activeCells.includes(i);
+      if (!isActive) return '';
+      const x = (i % config.gridSize) * 40;
+      const y = Math.floor(i / config.gridSize) * 40;
+      const rx = config.shape === 'circle' ? 20 : config.shape === 'rounded' ? 8 : 0;
+      
+      return `<rect x="${x}" y="${y}" width="32" height="32" rx="${rx}" fill="${config.color}">
+        <animate attributeName="opacity" values="0.4;1;0.4" dur="${1/config.speed}s" repeatCount="indefinite" />
+      </rect>`;
+    }).join('\n');
+
+    const code = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    @keyframes pulse {
+      0%, 100% { opacity: 0.4; transform: scale(0.95); }
+      50% { opacity: 1; transform: scale(1.05); }
+    }
+  </style>
+  ${cells}
+</svg>`;
+    
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopiedSVG(true);
+      setTimeout(() => setCopiedSVG(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy SVG: ', err);
+    }
+  };
+
+  const downloadLottie = () => {
+    const lottie = {
+      v: "5.5.7",
+      fr: 60,
+      ip: 0,
+      op: 60,
+      w: 512,
+      h: 512,
+      nm: config.name,
+      ddd: 0,
+      assets: [],
+      layers: config.activeCells.map((cellIdx, i) => {
+        const x = (cellIdx % config.gridSize) * 100;
+        const y = Math.floor(cellIdx / config.gridSize) * 100;
+        return {
+          ddd: 0,
+          ind: i,
+          ty: 4,
+          nm: `Cell ${cellIdx}`,
+          sr: 1,
+          ks: {
+            o: { a: 1, k: [{ t: 0, s: [40] }, { t: 30, s: [100] }, { t: 60, s: [40] }] },
+            p: { a: 0, k: [x, y, 0] },
+            s: { a: 1, k: [{ t: 0, s: [100, 100] }, { t: 30, s: [120, 120] }, { t: 60, s: [100, 100] }] }
+          },
+          shapes: [{
+            ty: "gr",
+            it: [{
+              ty: "rc",
+              s: { a: 0, k: [80, 80] },
+              p: { a: 0, k: [0, 0] },
+              r: { a: 0, k: config.shape === 'circle' ? 40 : config.shape === 'rounded' ? 10 : 0 }
+            }, {
+              ty: "fl",
+              c: { a: 0, k: [1, 1, 1, 1] }
+            }]
+          }]
+        };
+      })
+    };
+    
+    const blob = new Blob([JSON.stringify(lottie, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${config.name.toLowerCase().replace(/\s+/g, '-')}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const generateSVGCode = () => {
+    const size = config.gridSize * 40;
+    const cells = Array.from({ length: config.gridSize * config.gridSize }).map((_, i) => {
+      const isActive = config.activeCells.includes(i);
+      if (!isActive) return '';
+      const x = (i % config.gridSize) * 40;
+      const y = Math.floor(i / config.gridSize) * 40;
+      const rx = config.shape === 'circle' ? 20 : config.shape === 'rounded' ? 8 : 0;
+      
+      return `<rect x="${x}" y="${y}" width="32" height="32" rx="${rx}" fill="${config.color}">
+        <animate attributeName="opacity" values="0.4;1;0.4" dur="${1/config.speed}s" repeatCount="indefinite" />
+      </rect>`;
+    }).join('\n');
+
+    const code = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    @keyframes pulse {
+      0%, 100% { opacity: 0.4; transform: scale(0.95); }
+      50% { opacity: 1; transform: scale(1.05); }
+    }
+  </style>
+  ${cells}
+</svg>`;
+    setModalContent({ title: 'SVG Code', code });
+    setModalOpen(true);
+  };
+
+  const generateLottieJSON = () => {
+    // Simplified Lottie JSON structure
+    const lottie = {
+      v: "5.5.7",
+      fr: 60,
+      ip: 0,
+      op: 60,
+      w: 512,
+      h: 512,
+      nm: config.name,
+      ddd: 0,
+      assets: [],
+      layers: config.activeCells.map((cellIdx, i) => {
+        const x = (cellIdx % config.gridSize) * 100;
+        const y = Math.floor(cellIdx / config.gridSize) * 100;
+        return {
+          ddd: 0,
+          ind: i,
+          ty: 4,
+          nm: `Cell ${cellIdx}`,
+          sr: 1,
+          ks: {
+            o: { a: 1, k: [{ t: 0, s: [40] }, { t: 30, s: [100] }, { t: 60, s: [40] }] },
+            p: { a: 0, k: [x, y, 0] },
+            s: { a: 1, k: [{ t: 0, s: [100, 100] }, { t: 30, s: [120, 120] }, { t: 60, s: [100, 100] }] }
+          },
+          shapes: [{
+            ty: "gr",
+            it: [{
+              ty: "rc",
+              s: { a: 0, k: [80, 80] },
+              p: { a: 0, k: [0, 0] },
+              r: { a: 0, k: config.shape === 'circle' ? 40 : config.shape === 'rounded' ? 10 : 0 }
+            }, {
+              ty: "fl",
+              c: { a: 0, k: [1, 1, 1, 1] } // Simplified color
+            }]
+          }]
+        };
+      })
+    };
+    setModalContent({ title: 'Lottie JSON', code: JSON.stringify(lottie, null, 2) });
+    setModalOpen(true);
   };
 
   const generateReactCode = () => {
@@ -301,20 +457,44 @@ export const CustomLoader = () => {
 
         {/* Export Actions */}
         <div className="mt-auto pt-6 border-t border-white/5 space-y-3">
-          <button 
-            onClick={generateReactCode}
-            className="w-full flex items-center justify-center gap-2 py-3 bg-white text-black rounded-xl font-medium hover:bg-zinc-200 transition-colors text-sm"
-          >
-            <Download className="w-4 h-4" />
-            Export React Component
-          </button>
-          <button 
-            onClick={generateCSSCode}
-            className="w-full flex items-center justify-center gap-2 py-3 bg-white/5 text-white rounded-xl font-medium hover:bg-white/10 transition-colors text-sm"
-          >
-            <Copy className="w-4 h-4" />
-            Copy CSS
-          </button>
+          <div className="grid grid-cols-2 gap-2">
+            <button 
+              onClick={generateReactCode}
+              className="flex items-center justify-center gap-2 py-2.5 bg-white text-black rounded-xl font-medium hover:bg-zinc-200 transition-colors text-xs"
+            >
+              <Code className="w-3.5 h-3.5" />
+              React
+            </button>
+            <button 
+              onClick={generateCSSCode}
+              className="flex items-center justify-center gap-2 py-2.5 bg-white/5 text-white rounded-xl font-medium hover:bg-white/10 transition-colors text-xs border border-white/5"
+            >
+              <Copy className="w-3.5 h-3.5" />
+              CSS
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            <button 
+              onClick={copySVG}
+              className={`
+                flex flex-col items-center justify-center gap-1 py-2 rounded-xl font-medium transition-all text-[10px] border
+                ${copiedSVG ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400' : 'bg-white/5 text-zinc-400 border-white/5 hover:bg-white/10'}
+              `}
+              title="Copy SVG to Clipboard"
+            >
+              {copiedSVG ? <Copy className="w-3.5 h-3.5" /> : <ImageIcon className="w-3.5 h-3.5" />}
+              {copiedSVG ? 'Copied!' : 'SVG'}
+            </button>
+            <button 
+              onClick={downloadLottie}
+              className="flex flex-col items-center justify-center gap-1 py-2 bg-white/5 text-zinc-400 rounded-xl font-medium hover:bg-white/10 transition-colors text-[10px] border border-white/5"
+              title="Download Lottie JSON"
+            >
+              <FileJson className="w-3.5 h-3.5" />
+              Lottie
+            </button>
+          </div>
         </div>
       </motion.div>
       </AnimatePresence>

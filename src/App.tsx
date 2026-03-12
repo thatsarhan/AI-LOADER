@@ -112,7 +112,7 @@ export default function App() {
                 {/* Canvas Container */}
                 <div className="relative group">
                   <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-[40px] opacity-10 group-hover:opacity-20 transition duration-1000 group-hover:duration-200" />
-                  <div className="relative bg-zinc-950 border border-white/10 rounded-[40px] p-24 shadow-2xl">
+                  <div id="preview-container" className="relative bg-zinc-950 border border-white/10 rounded-[40px] p-24 shadow-2xl">
                     <GridLoader 
                       config={config} 
                       isEditing={true}
