@@ -1,0 +1,5 @@
+{
+  "name": "Loader Studio",
+  "description": "A creative tool for designing and exporting custom CSS/React spinners and loaders using a grid-based animation engine.",
+  "requestFramePermissions": []
+}
