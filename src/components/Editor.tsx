@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
 import { LoaderConfig, CellShape, AnimationStyle } from '../types';
-import { Settings, Play, Square, Circle, Box, Zap, Sun, Wind, Trash2, Copy, Download, RotateCcw, Grid3X3, Dot, Sparkles, LayoutGrid } from 'lucide-react';
+import { Settings, Play, Square, Circle, Box, Zap, Sun, Wind, Trash2, Copy, Download, RotateCcw, Grid3X3, Dot, Sparkles, LayoutGrid, X } from 'lucide-react';
 import { CodeModal } from './CodeModal';
+import { motion, AnimatePresence } from 'motion/react';
 
 interface EditorProps {
   config: LoaderConfig;
   onChange: (config: LoaderConfig) => void;
   onReset: () => void;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
-export const Editor: React.FC<EditorProps> = ({ config, onChange, onReset }) => {
+export const Editor: React.FC<EditorProps> = ({ config, onChange, onReset, isOpen, onClose }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState({ title: '', code: '' });
 
@@ -104,19 +107,52 @@ export const CustomLoader = () => {
 
   return (
     <>
-      <div className="w-80 bg-zinc-900/50 border-l border-white/10 h-full overflow-y-auto p-6 flex flex-col gap-8">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold flex items-center gap-2">
-            <Settings className="w-5 h-5 text-blue-400" />
-            Settings
-          </h2>
-          <button 
-            onClick={onReset}
-            className="p-2 hover:bg-white/5 rounded-lg transition-colors text-zinc-400 hover:text-white"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
-        </div>
+      <AnimatePresence>
+        {/* Mobile Backdrop */}
+        {isOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] md:hidden"
+          />
+        )}
+
+        <motion.div 
+          className={`
+            fixed md:relative right-0 top-0 h-full w-80 bg-zinc-900/50 border-l border-white/10 
+            overflow-y-auto p-6 flex flex-col gap-8 z-[101] md:z-auto
+            ${isOpen ? 'translate-x-0' : 'translate-x-full md:translate-x-0'}
+            transition-transform duration-300 ease-in-out
+          `}
+          initial={false}
+          animate={isOpen ? { x: 0 } : {}}
+        >
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold flex items-center gap-2">
+              <Settings className="w-5 h-5 text-blue-400" />
+              Settings
+            </h2>
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={onReset}
+                className="p-2 hover:bg-white/5 rounded-lg transition-colors text-zinc-400 hover:text-white"
+                title="Reset Canvas"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+              {onClose && (
+                <button 
+                  onClick={onClose}
+                  className="p-2 hover:bg-white/5 rounded-lg transition-colors text-zinc-400 hover:text-white md:hidden"
+                  title="Close Settings"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              )}
+            </div>
+          </div>
 
         {/* Basic Info */}
         <div className="space-y-4">
@@ -280,7 +316,8 @@ export const CustomLoader = () => {
             Copy CSS
           </button>
         </div>
-      </div>
+      </motion.div>
+      </AnimatePresence>
 
       <CodeModal 
         isOpen={modalOpen} 

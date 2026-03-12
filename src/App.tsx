@@ -9,12 +9,14 @@ import {
   LayoutGrid, 
   Sparkles, 
   RotateCcw, 
-  Grid3X3
+  Grid3X3,
+  Settings
 } from 'lucide-react';
 
 export default function App() {
   const [config, setConfig] = useState<LoaderConfig>(INITIAL_CONFIG);
   const [activeTab, setActiveTab] = useState<'builder' | 'library'>('builder');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const handleToggleCell = useCallback((index: number) => {
     setConfig(prev => {
@@ -74,8 +76,15 @@ export default function App() {
           </nav>
 
           <div className="flex items-center gap-4">
-            <div className="h-4 w-[1px] bg-white/10" />
-            <div className="flex items-center gap-2 px-4 py-2 bg-zinc-800 text-zinc-400 rounded-xl text-[10px] font-bold uppercase tracking-widest border border-white/5">
+            <button 
+              onClick={() => setIsSidebarOpen(true)}
+              className="md:hidden flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-xl text-xs font-bold uppercase tracking-widest shadow-[0_0_15px_rgba(59,130,246,0.3)]"
+            >
+              <Settings className="w-3.5 h-3.5" />
+              Edit
+            </button>
+            <div className="h-4 w-[1px] bg-white/10 hidden md:block" />
+            <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-zinc-800 text-zinc-400 rounded-xl text-[10px] font-bold uppercase tracking-widest border border-white/5">
               Editor Mode
             </div>
           </div>
@@ -155,7 +164,13 @@ export default function App() {
       </main>
 
       {/* Sidebar Editor */}
-      <Editor config={config} onChange={setConfig} onReset={handleReset} />
+      <Editor 
+        config={config} 
+        onChange={setConfig} 
+        onReset={handleReset} 
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+      />
     </div>
   );
 }
