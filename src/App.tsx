@@ -32,9 +32,14 @@ export default function App() {
     setActiveTab('builder');
   };
 
-  const handleReset = () => {
-    setConfig({ ...INITIAL_CONFIG, activeCells: [] });
-  };
+  const handleReset = useCallback(() => {
+    setConfig({
+      ...INITIAL_CONFIG,
+      name: 'Custom Loader',
+      activeCells: [],
+      id: `custom-${Math.random().toString(36).substr(2, 9)}`
+    });
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#050505] text-zinc-100 font-sans selection:bg-blue-500/30 flex overflow-hidden">
@@ -114,6 +119,7 @@ export default function App() {
                   <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-[40px] opacity-10 group-hover:opacity-20 transition duration-1000 group-hover:duration-200" />
                   <div id="preview-container" className="relative bg-zinc-950 border border-white/10 rounded-[40px] p-24 shadow-2xl">
                     <GridLoader 
+                      key={config.id}
                       config={config} 
                       isEditing={true}
                       onToggleCell={handleToggleCell}
@@ -125,7 +131,7 @@ export default function App() {
                 <div className="flex gap-4">
                   <button 
                     onClick={handleReset}
-                    className="flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl text-sm font-medium transition-all"
+                    className="flex items-center gap-2 px-8 py-3.5 bg-zinc-900 hover:bg-zinc-800 border-2 border-blue-500 rounded-full text-sm font-bold transition-all shadow-[0_0_20px_rgba(59,130,246,0.2)] active:scale-95"
                   >
                     <RotateCcw className="w-4 h-4" />
                     Clear Canvas
