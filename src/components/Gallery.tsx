@@ -35,7 +35,7 @@ export const Gallery: React.FC<GalleryProps> = ({ onSelect, currentId }) => {
                 animationStyle: preset.animationStyle || 'opacity',
                 backgroundStyle: 'static',
                 glow: preset.glow || false,
-                blur: 4,
+                blur: 0,
               }} 
             />
           </div>

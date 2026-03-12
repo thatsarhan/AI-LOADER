@@ -59,7 +59,7 @@ export const CustomLoader = () => {
             transition={{
               duration: 1 / speed,
               repeat: Infinity,
-              ease: ${config.animationStyle === 'pixel' ? '"steps(4)"' : '"easeInOut"'},
+              ease: "linear",
               delay: ${config.animationStyle === 'wave' ? '(i % gridSize + Math.floor(i / gridSize)) * 0.15' : config.animationStyle === 'matrix' ? '(i % gridSize) * 0.5 + (Math.floor(i / gridSize)) * 0.1' : '(i % gridSize) * 0.1'}
             }}
           />

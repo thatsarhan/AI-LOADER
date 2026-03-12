@@ -14,7 +14,7 @@ import {
 
 export default function App() {
   const [config, setConfig] = useState<LoaderConfig>(INITIAL_CONFIG);
-  const [activeTab, setActiveTab] = useState<'builder' | 'gallery'>('builder');
+  const [activeTab, setActiveTab] = useState<'builder' | 'library'>('builder');
 
   const handleToggleCell = useCallback((index: number) => {
     setConfig(prev => {
@@ -62,14 +62,14 @@ export default function App() {
               Builder
             </button>
             <button 
-              onClick={() => setActiveTab('gallery')}
+              onClick={() => setActiveTab('library')}
               className={`
                 flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-medium transition-all
-                ${activeTab === 'gallery' ? 'bg-white text-black shadow-lg' : 'text-zinc-400 hover:text-white'}
+                ${activeTab === 'library' ? 'bg-white text-black shadow-lg' : 'text-zinc-400 hover:text-white'}
               `}
             >
               <Grid3X3 className="w-3.5 h-3.5" />
-              Gallery
+              Library
             </button>
           </nav>
 
@@ -125,7 +125,7 @@ export default function App() {
               </motion.div>
             ) : (
               <motion.div 
-                key="gallery"
+                key="library"
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 1.05 }}

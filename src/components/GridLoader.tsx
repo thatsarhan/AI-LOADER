@@ -99,7 +99,7 @@ export const GridLoader: React.FC<GridLoaderProps> = ({
           },
           transition: {
             ...baseTransition,
-            ease: "steps(4)",
+            ease: (v: number) => Math.floor(v * 4) / 4,
             duration: 1.2 / speed
           }
         };
